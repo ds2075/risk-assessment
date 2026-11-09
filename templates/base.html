@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Оценка риска клиента{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --ink: #14181f; --muted: #5b6472; --line: #e2e5ea;
+    --accent: #1f4e8c; --accent-ink: #ffffff; --accent-soft: #e8eef8;
+    --low: #1d7a46; --low-bg: #e3f4ea; --mid: #9a6400; --mid-bg: #fff3d6;
+    --high: #b42318; --high-bg: #fde7e5; --err-bg: #fde7e5;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --card: #171b21; --ink: #e8ebef; --muted: #98a1ae; --line: #2a3039;
+      --accent: #5b8fd6; --accent-ink: #0b0e12; --accent-soft: #1b2635;
+      --low: #5fd08f; --low-bg: #12291c; --mid: #f0b44c; --mid-bg: #2e2410;
+      --high: #ff7b6e; --high-bg: #331614; --err-bg: #331614;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 64px; }
+  header.top { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .logo { width: 36px; height: 36px; border-radius: 10px; background: var(--accent);
+          display: grid; place-items: center; color: var(--accent-ink); font-weight: 700; }
+  .brand { font-weight: 600; } .brand small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; }
+  h1 { font-size: clamp(26px, 4vw, 36px); line-height: 1.15; margin: 0 0 10px; letter-spacing: -0.02em; }
+  h2 { font-size: 18px; margin: 0 0 14px; }
+  .lead { color: var(--muted); max-width: 640px; margin: 0 0 26px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .grid { display: grid; gap: 16px; }
+  @media (min-width: 860px) { .grid.two { grid-template-columns: 1.4fr 1fr; } }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px;
+         border: 1px solid transparent; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn.ghost:hover { border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .alert { background: var(--err-bg); color: var(--high); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .b-Низкий { background: var(--low-bg); color: var(--low); }
+  .b-Средний { background: var(--mid-bg); color: var(--mid); }
+  .b-Высокий { background: var(--high-bg); color: var(--high); }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; }
+  .muted { color: var(--muted); }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">ПФ</div>
+    <div class="brand">Оценка риска клиента<small>НС ПОД/ФТ · учебный проект</small></div>
+  </header>
+  {% block content %}{% endblock %}
+  <footer>Веса критериев и нормы — учебная методика, а не установленные законом значения.</footer>
+</div>
+</body>
+</html>

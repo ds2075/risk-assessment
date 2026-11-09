@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+  .drop { display: block; border: 2px dashed var(--line); border-radius: var(--radius); padding: 34px 18px; text-align: center;
+          cursor: pointer; transition: border-color .15s, background .15s; margin-bottom: 16px; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop input { display: none; }
+  .drop .big { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .drop .file { margin-top: 10px; font-weight: 600; color: var(--accent); word-break: break-all; }
+  .grid.two { align-items: start; }
+  ol.steps { margin: 0; padding-left: 20px; } ol.steps li { margin-bottom: 8px; }
+  table.levels { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.levels td { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  table.levels tr:last-child td { border-bottom: 0; }
+  .spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent;
+             border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  .busy .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Загрузите таблицу клиентов</h1>
+<p class="lead">Сервис проверит каждого клиента по критериям методики, начислит баллы
+  и вернёт ту же таблицу с итоговым баллом, уровнем риска и обоснованием.</p>
+
+<div class="grid two">
+  <form class="card" id="form" method="post" action="{{ url_for('process') }}" enctype="multipart/form-data">
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <label class="drop" id="drop">
+      <input type="file" name="file" id="file" accept=".xlsx">
+      <div class="big">Перетащите файл сюда или нажмите, чтобы выбрать</div>
+      <div class="muted">Excel .xlsx по шаблону, до {{ max_mb }} МБ</div>
+      <div class="file" id="fname"></div>
+    </label>
+    <div class="row">
+      <button class="btn primary" id="go" type="submit" disabled><span class="spinner"></span>Оценить риск</button>
+      <a class="btn ghost" href="{{ url_for('template') }}">Скачать шаблон</a>
+      <a class="btn ghost" href="{{ url_for('example') }}">Пример с данными</a>
+    </div>
+  </form>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Как это работает</h2>
+      <ol class="steps">
+        <li>Скачайте шаблон и внесите клиентов — одна строка на компанию.</li>
+        <li>Загрузите файл. Профиль определяется по ОКВЭД, нормы зависят от отрасли.</li>
+        <li>Получите таблицу с результатом и лист «Подробный отчёт».</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Уровни риска</h2>
+      <table class="levels">
+        <tr><td><span class="badge b-Низкий">Низкий</span></td><td class="mono">0–20 баллов</td></tr>
+        <tr><td><span class="badge b-Средний">Средний</span></td><td class="mono">21–50 баллов</td></tr>
+        <tr><td><span class="badge b-Высокий">Высокий</span></td><td class="mono">51 и более</td></tr>
+      </table>
+      <p class="muted" style="margin:12px 0 0">Стоп-факторы — дисквалифицированный директор или страна
+        из чёрного списка FATF — сразу дают высокий уровень.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const drop = document.getElementById('drop'), input = document.getElementById('file'),
+        fname = document.getElementById('fname'), go = document.getElementById('go'),
+        form = document.getElementById('form');
+  function show() { const f = input.files[0]; fname.textContent = f ? f.name : ''; go.disabled = !f; }
+  input.addEventListener('change', show);
+  ['dragenter','dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) { input.files = ev.dataTransfer.files; show(); } });
+  form.addEventListener('submit', () => { go.classList.add('busy'); go.disabled = true; });
+</script>
+{% endblock %}

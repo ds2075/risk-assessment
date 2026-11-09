@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Результат оценки риска{% endblock %}
+{% block head %}
+<style>
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .stat .n { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .stat.l .n { color: var(--low); } .stat.m .n { color: var(--mid); } .stat.h .n { color: var(--high); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+  table.res { width: 100%; border-collapse: collapse; min-width: 720px; }
+  table.res th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+                 color: var(--muted); padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  table.res td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.res tr:last-child td { border-bottom: 0; }
+  .score { font-weight: 700; font-size: 18px; }
+  details summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+  ul.f { margin: 8px 0 0; padding-left: 18px; } ul.f li { margin-bottom: 3px; }
+  .pts { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+  .stop { color: var(--high); font-weight: 600; }
+  .warn { color: var(--mid); }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Готово. Проверено клиентов: {{ results|length }}</h1>
+<p class="lead">Таблица с результатом хранится {{ keep_min }} минут — скачайте её.</p>
+
+<div class="row" style="margin-bottom:22px">
+  <a class="btn primary" href="{{ url_for('download', job=job, name=download_name) }}">Скачать таблицу с результатом</a>
+  <a class="btn ghost" href="{{ url_for('index') }}">Проверить другую таблицу</a>
+</div>
+
+<div class="stats">
+  <div class="stat l"><div class="n">{{ counts.get('Низкий', 0) }}</div>Низкий риск</div>
+  <div class="stat m"><div class="n">{{ counts.get('Средний', 0) }}</div>Средний риск</div>
+  <div class="stat h"><div class="n">{{ counts.get('Высокий', 0) }}</div>Высокий риск</div>
+</div>
+
+<div class="tablewrap">
+<table class="res">
+  <thead><tr><th>Стр.</th><th>Клиент</th><th>Профиль</th><th>Балл</th><th>Уровень</th><th>Обоснование</th></tr></thead>
+  <tbody>
+  {% for r in results %}
+    <tr>
+      <td class="mono">{{ r.row }}</td>
+      <td><strong>{{ r.name or '(без названия)' }}</strong><br><span class="mono muted">{{ r.inn or 'ИНН не указан' }}</span></td>
+      <td>{{ r.profile }}</td>
+      <td class="score">{{ r.score }}</td>
+      <td><span class="badge b-{{ r.level }}">{{ r.level }}</span></td>
+      <td>
+        {% set n = r.findings|length + r.missing|length + r.warnings|length %}
+        {% if n == 0 %}<span class="muted">Признаков риска не выявлено</span>
+        {% else %}
+        <details {% if r.stop_factors %}open{% endif %}>
+          <summary>{{ r.findings|length }} признак(ов){% if r.missing %}, не заполнено: {{ r.missing|length }}{% endif %}</summary>
+          <ul class="f">
+            {% for f in r.findings %}
+              <li class="{{ 'stop' if f.stop }}">{% if f.stop %}Стоп-фактор: {% endif %}{{ f.label }} {{ f.text }}{% if f.points %} <span class="pts">+{{ f.points }}</span>{% endif %}</li>
+            {% endfor %}
+            {% for m in r.missing %}<li class="muted">Не заполнено: {{ m }}</li>{% endfor %}
+            {% for w in r.warnings %}<li class="warn">{{ w }}</li>{% endfor %}
+          </ul>
+        </details>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
